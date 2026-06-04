@@ -1,0 +1,17 @@
+.git
+.gitignore
+.github
+*.md
+LICENSE
+systemd
+udev
+docker-compose.yaml
+.dockerignore
+__pycache__
+*.py[cod]
+.venv
+venv
+env
+.vscode
+.idea
+.DS_Store

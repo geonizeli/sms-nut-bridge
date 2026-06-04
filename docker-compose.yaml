@@ -1,0 +1,31 @@
+services:
+  sms-nut-bridge:
+    # Use the prebuilt image once it is published, or build locally (default).
+    image: ghcr.io/geonizeli/sms-nut-bridge:latest
+    build: .
+    container_name: sms-nut-bridge
+    restart: unless-stopped
+
+    # Pass the UPS serial device into the container.
+    # Change the host path to match your adapter (e.g. /dev/ttyUSB0 or the
+    # /dev/ttyUPS symlink created by the udev rule in udev/99-sms-ups.rules).
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+
+    # The container process must belong to the group that owns the serial
+    # device on the host. Find it with:  stat -c '%g' /dev/ttyUSB0
+    # (commonly 'dialout' = 20 on Debian/Ubuntu, 'uucp' = 14 on Arch).
+    group_add:
+      - "20"
+
+    # Expose the NUT protocol to other hosts on the network.
+    ports:
+      - "3493:3493"
+
+    # Override the device/name/interval here if needed.
+    command:
+      - "--device=/dev/ttyUSB0"
+      - "--name=sms"
+      - "--host=0.0.0.0"
+      - "--port=3493"
+      - "--interval=3"

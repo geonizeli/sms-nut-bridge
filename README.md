@@ -91,6 +91,51 @@ sudo udevadm control --reload && sudo udevadm trigger
 Adjust the `idVendor`/`idProduct` in the rule to match your adapter
 (`lsusb` shows them).
 
+## Run with Docker
+
+The bridge ships with a `Dockerfile` and `docker-compose.yaml`. The container
+needs the host serial device passed in and must belong to the group that owns
+that device node.
+
+```bash
+# find the device's group id (gid) on the host
+stat -c '%g' /dev/ttyUSB0      # e.g. 20 (dialout) or 14 (uucp)
+```
+
+Edit `docker-compose.yaml` so `devices:` points at your adapter and `group_add:`
+matches that gid, then:
+
+```bash
+docker compose up -d --build
+docker compose logs -f          # watch it connect and poll
+
+# from any NUT client on the network
+upsc sms@<docker-host>
+```
+
+By default Compose builds the image locally. Once the image is published to
+GHCR (see below) you can skip the build and just pull
+`ghcr.io/geonizeli/sms-nut-bridge:latest`.
+
+To run it without Compose:
+
+```bash
+docker build -t sms-nut-bridge .
+docker run -d --name sms-nut-bridge --restart unless-stopped \
+  --device /dev/ttyUSB0 \
+  --group-add "$(stat -c '%g' /dev/ttyUSB0)" \
+  -p 3493:3493 \
+  sms-nut-bridge --device /dev/ttyUSB0
+```
+
+### Publishing the image (GitHub Actions)
+
+`.github/workflows/docker-publish.yml` builds a multi-arch (`amd64` + `arm64`)
+image and pushes it to GHCR on every push to `main` and on `vX.Y.Z` tags, using
+the repository's built-in `GITHUB_TOKEN` — no extra secrets to configure. After
+the first successful run, set the package visibility to public in the repo's
+**Packages** settings if you want others to pull it.
+
 ## Command-line options
 
 | flag | default | description |
