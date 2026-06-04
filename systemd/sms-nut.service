@@ -1,0 +1,19 @@
+[Unit]
+Description=SMS-compatible UPS -> NUT bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# The group must own the serial device (dialout on Debian/Ubuntu, uucp on Arch).
+User=joao
+SupplementaryGroups=dialout
+# Adjust the script path and --device to match your machine.
+ExecStart=/usr/bin/python3 /opt/sms-nut/sms_nut_bridge.py --device /dev/ttyUSB0 --host 0.0.0.0 --port 3493 --interval 3
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,4 @@
+# Stable name + group access for the UPS serial adapter.
+# Adjust idVendor/idProduct to match your adapter (see `lsusb`).
+# Example below: Prolific PL2303 (067b:23a3).
+SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="23a3", MODE="0660", GROUP="dialout", SYMLINK+="ttyUPS"
